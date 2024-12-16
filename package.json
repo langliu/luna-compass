@@ -1,6 +1,6 @@
 {
   "name": "luna-compass",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "type": "module",
   "exports": {
     ".": {
@@ -37,8 +37,9 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.1.0",
     "@types/react": "^19.0.1",
+    "@vanilla-extract/css": "^1.16.1",
     "jsdom": "^25.0.1",
-    "react": "^19.0.0",
+    "react": "^18.3.0",
     "storybook": "^8.4.7",
     "storybook-addon-rslib": "^0.1.5",
     "storybook-react-rsbuild": "^0.1.5",
@@ -49,5 +50,7 @@
     "react": ">=16.9.0",
     "react-dom": ">=16.9.0"
   },
-  "private": true
+  "dependencies": {
+    "class-variance-authority": "^0.7.1"
+  }
 }

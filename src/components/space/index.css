@@ -1,0 +1,11 @@
+.lc-space {
+  display: inline-flex;
+}
+
+.lc-space-horizontal {
+  flex-direction: row;
+}
+
+.lc-space-vertical {
+  flex-direction: column;
+}
