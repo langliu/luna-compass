@@ -26,10 +26,10 @@ export type SpaceProps = HTMLAttributes<HTMLDivElement> & {
 const spaceVariants = cva('lc-space', {
   variants: {
     align: {
-      start: 'space-start',
-      end: 'space-end',
-      center: 'space-center',
-      baseline: 'space-baseline',
+      end: 'lc-space-align-end',
+      start: 'lc-space-align-start',
+      center: 'lc-space-align-center',
+      baseline: 'lc-space-align-baseline',
     },
     direction: {
       horizontal: 'lc-space-horizontal',
@@ -64,9 +64,9 @@ export function Space({
   const spaceSize = space?.size || size;
 
   const children = Children.toArray(props.children).map((child, index) => {
-    const key =  `space-${index}`;
+    const key = `space-${index}`;
     return (
-      <div className='space-item astra-kit' key={key} data-key={key}>
+      <div className="space-item astra-kit" key={key} data-key={key}>
         {child}
       </div>
     );

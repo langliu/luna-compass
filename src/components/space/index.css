@@ -9,3 +9,19 @@
 .lc-space-vertical {
   flex-direction: column;
 }
+
+.lc-space-align-baseline {
+  align-items: baseline;
+}
+
+.lc-space-align-center {
+  align-items: center;
+}
+
+.lc-space-align-start {
+  align-items: flex-start;
+}
+
+.lc-space-align-end {
+  align-items: flex-end;
+}
