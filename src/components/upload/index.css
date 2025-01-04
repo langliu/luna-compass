@@ -1,0 +1,12 @@
+@layer upload {
+  .lc-upload {
+  }
+
+  .lc-upload__label {
+    display: inline-block;
+  }
+
+  .lc-upload__input {
+    display: none;
+  }
+}
