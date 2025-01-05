@@ -21,9 +21,9 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.3",
+    "@biomejs/biome": "^1.9.4",
     "@rsbuild/core": "~1.1.13",
-    "@rsbuild/plugin-react": "^1.0.7",
+    "@rsbuild/plugin-react": "^1.1.0",
     "@rslib/core": "^0.2.2",
     "@storybook/addon-essentials": "^8.4.7",
     "@storybook/addon-interactions": "^8.4.7",
@@ -39,9 +39,9 @@
     "jsdom": "^25.0.1",
     "react": "^18.3.0",
     "storybook": "^8.4.7",
-    "storybook-addon-rslib": "^0.1.6",
-    "storybook-react-rsbuild": "^0.1.6",
-    "typescript": "^5.6.3",
+    "storybook-addon-rslib": "^0.1.7",
+    "storybook-react-rsbuild": "^0.1.7",
+    "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   },
   "peerDependencies": {
@@ -54,6 +54,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lodash-es": "^4.17.21",
+    "lucide-react": "^0.469.0",
     "radash": "^12.1.0"
   }
 }

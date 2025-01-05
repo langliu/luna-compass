@@ -39,6 +39,12 @@ export type UploadProps = PropsWithChildren<{
   onSuccess?: (response: unknown, file: File) => void
   onError?: (error: Error, file: File) => void
   onChange?: (file: File) => void
+  /**
+   * 上传进度回调
+   * @param percent 上传进度百分比
+   * @param file 上传的文件
+   */
+  onProgress?: (percent: number, file: File) => void
 }>
 
 export function Upload({
@@ -54,6 +60,7 @@ export function Upload({
   onSuccess,
   onError,
   onChange,
+  onProgress,
 }: UploadProps) {
   const uploadRef = useRef<HTMLInputElement>(null)
 
@@ -109,46 +116,57 @@ export function Upload({
         formData.append(key, data[key])
       }
     }
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', action, true)
+    xhr.withCredentials = withCredentials
+    // 设置请求头
+    for (const key in headers) {
+      xhr.setRequestHeader(key, headers[key])
+    }
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percent = (event.loaded / event.total) * 100
+        onProgress?.(percent, file)
+      }
+    }
 
-    // 发送请求
-    fetch(action, {
-      method: 'POST',
-      headers: {
-        ...headers,
-        // 'Content-Type': 'multipart/form-data',
-      },
-      credentials: withCredentials ? 'include' : 'same-origin',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        onSuccess?.(data, file)
-      })
-      .catch((error) => {
-        onError?.(error, file)
-      })
-      .finally(() => {
-        onChange?.(file)
-      })
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        const response = JSON.parse(xhr.responseText)
+        onSuccess?.(response, file)
+      } else {
+        onError?.(new Error('Upload failed'), file)
+      }
+      onChange?.(file)
+    }
+
+    xhr.onerror = () => {
+      onError?.(new Error('Network error'), file)
+      onChange?.(file)
+    }
+
+    xhr.onabort = () => {
+      onError?.(new Error('Upload aborted'), file)
+      onChange?.(file)
+    }
+
+    xhr.send(formData)
   }
 
   return (
-    <div className="lc-upload">
-      <div
-        className="lc-upload__label"
-        onClick={handleClick}
-        onKeyDown={() => {}}
-      >
+    <div className='lc-upload'>
+      <div className='lc-upload__label' onClick={handleClick} onKeyDown={() => {}}>
         {children}
         <input
-          className="lc-upload__input"
+          className='lc-upload__input'
           ref={uploadRef}
           multiple={multiple}
           accept={accept}
-          type="file"
+          type='file'
           onChange={handleChange}
         />
       </div>
+      <UploadList fileList={fileList} onRemove={() => {}} />
     </div>
   )
 }
