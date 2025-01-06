@@ -1,0 +1,35 @@
+@layer progress {
+  .lc-progress {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    box-sizing: border-box;
+    gap: 8px;
+  }
+
+  .lc-progress-inner {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    flex: 1;
+    overflow: hidden;
+    vertical-align: middle;
+    background-color: rgba(0, 0, 0, 0.06);
+    border-radius: 100px;
+    box-sizing: border-box;
+  }
+
+  .lc-progress-text {
+    max-width: max-content;
+    display: inline-block;
+    color: rgba(0, 0, 0, 0.88);
+    line-height: 1;
+    white-space: nowrap;
+    text-align: start;
+    word-break: normal;
+    vertical-align: middle;
+  }
+  .progress-bar {
+    @apply absolute h-full bg-blue-500;
+  }
+}
