@@ -19,6 +19,28 @@
     box-sizing: border-box;
   }
 
+  .lc-progress-bg {
+    position: relative;
+    height: 8px;
+    border-radius: 100px;
+  }
+
+  .lc-progress-bg-normal {
+    background-color: #1677ff;
+  }
+
+  .lc-progress-bg-success {
+    background-color: #52c41a;
+  }
+
+  .lc-progress-bg-exception {
+    background-color: #ff4d4f;
+  }
+
+  .lc-progress-size-small {
+    height: 6px;
+  }
+
   .lc-progress-text {
     max-width: max-content;
     display: inline-block;
