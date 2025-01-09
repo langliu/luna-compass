@@ -1,5 +1,7 @@
-import { type ChangeEvent, type PropsWithChildren, useRef } from 'react'
+import { type ChangeEvent, type PropsWithChildren, useRef, useState } from 'react'
 import './index.css'
+import Dragger from './dragger'
+import { type UploadFile, UploadList } from './upload-list'
 
 export type UploadProps = PropsWithChildren<{
   /**
@@ -39,12 +41,9 @@ export type UploadProps = PropsWithChildren<{
   onSuccess?: (response: unknown, file: File) => void
   onError?: (error: Error, file: File) => void
   onChange?: (file: File) => void
-  /**
-   * 上传进度回调
-   * @param percent 上传进度百分比
-   * @param file 上传的文件
-   */
-  onProgress?: (percent: number, file: File) => void
+  onProgress?: (percentage: number, file: File) => void
+  onRemove?: (file: UploadFile) => void
+  drag?: boolean
 }>
 
 export function Upload({
@@ -61,8 +60,12 @@ export function Upload({
   onError,
   onChange,
   onProgress,
+  onRemove,
+  drag = false,
 }: UploadProps) {
   const uploadRef = useRef<HTMLInputElement>(null)
+
+  const [fileList, setFileList] = useState<UploadFile[]>([])
 
   /**
    * 触发上传文件选择
@@ -77,27 +80,7 @@ export function Upload({
     const { files } = e.target
     // 判断是否有文件被选择
     if (files && files.length > 0) {
-      // 处理文件上传
-      for (const file of Array.from(files)) {
-        // 检查是否定义了 beforeUpload 函数
-        if (beforeUpload) {
-          const result = beforeUpload(file)
-          // 如果返回值是一个 Promise
-          if (result && result instanceof Promise) {
-            // 等待 Promise 解析并获取处理后的文件
-            result.then((file) => {
-              // 调用 handleUpload 函数上传文件
-              handleUpload(file)
-            })
-          } else if (result) {
-            // 如果 beforeUpload 函数返回 true，则直接上传文件
-            handleUpload(file)
-          }
-        } else {
-          // 如果没有定义 beforeUpload 函数，则直接上传文件
-          handleUpload(file)
-        }
-      }
+      uploadFiles(files)
       // 清空文件选择框
       if (uploadRef.current) {
         uploadRef.current.value = ''
@@ -105,8 +88,43 @@ export function Upload({
     }
   }
 
+  const uploadFiles = (files: FileList) => {
+    // 处理文件上传
+    for (const file of Array.from(files)) {
+      // 检查是否定义了 beforeUpload 函数
+      if (beforeUpload) {
+        const result = beforeUpload(file)
+        // 如果返回值是一个 Promise
+        if (result && result instanceof Promise) {
+          // 等待 Promise 解析并获取处理后的文件
+          result.then((file) => {
+            // 调用 handleUpload 函数上传文件
+            handleUpload(file)
+          })
+        } else if (result) {
+          // 如果 beforeUpload 函数返回 true，则直接上传文件
+          handleUpload(file)
+        }
+      } else {
+        // 如果没有定义 beforeUpload 函数，则直接上传文件
+        handleUpload(file)
+      }
+    }
+  }
+
   // 处理文件上传
   const handleUpload = async (file: File) => {
+    const uploadFile: UploadFile = {
+      uid: `${Date.now()}upload-file${file.name}`,
+      status: 'ready',
+      name: file.name,
+      size: file.size,
+      percent: 0,
+      raw: file,
+    }
+    setFileList((prevList) => {
+      return [uploadFile, ...prevList]
+    })
     // 创建 FormData 对象
     const formData = new FormData()
     formData.append(name, file)
@@ -116,6 +134,8 @@ export function Upload({
         formData.append(key, data[key])
       }
     }
+
+    // 发送请求
     const xhr = new XMLHttpRequest()
     xhr.open('POST', action, true)
     xhr.withCredentials = withCredentials
@@ -125,22 +145,38 @@ export function Upload({
     }
     xhr.upload.onprogress = (event) => {
       if (event.lengthComputable) {
-        const percent = (event.loaded / event.total) * 100
-        onProgress?.(percent, file)
+        const progress = (event.loaded / event.total) * 100
+        if (progress < 100) {
+          updateFileList(uploadFile, {
+            percent: progress,
+            status: 'uploading',
+          })
+        }
+        onProgress?.(progress, file)
+        // 在这里可以调用一个函数来更新进度条或其他UI元素
       }
     }
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
         const response = JSON.parse(xhr.responseText)
+        updateFileList(uploadFile, { status: 'success', response: response })
         onSuccess?.(response, file)
       } else {
+        updateFileList(uploadFile, {
+          status: 'error',
+          error: new Error('Upload failed'),
+        })
         onError?.(new Error('Upload failed'), file)
       }
       onChange?.(file)
     }
 
     xhr.onerror = () => {
+      updateFileList(uploadFile, {
+        status: 'error',
+        error: new Error('Network error'),
+      })
       onError?.(new Error('Network error'), file)
       onChange?.(file)
     }
@@ -153,10 +189,37 @@ export function Upload({
     xhr.send(formData)
   }
 
+  const updateFileList = (file: UploadFile, uploadObj: Partial<UploadFile>) => {
+    setFileList((prevState) => {
+      return prevState.map((item) => {
+        if (item.uid === file.uid) {
+          return { ...item, ...uploadObj }
+        }
+        return item
+      })
+    })
+  }
+
+  const handleRemove = (file: UploadFile) => {
+    setFileList((prevState) => prevState.filter((item) => item.uid !== file.uid))
+    onRemove?.(file)
+  }
+
   return (
     <div className='lc-upload'>
       <div className='lc-upload__label' onClick={handleClick} onKeyDown={() => {}}>
-        {children}
+        {drag ? (
+          <Dragger
+            onFile={(files) => {
+              uploadFiles(files)
+            }}
+          >
+            {children}
+          </Dragger>
+        ) : (
+          children
+        )}
+
         <input
           className='lc-upload__input'
           ref={uploadRef}
@@ -166,7 +229,7 @@ export function Upload({
           onChange={handleChange}
         />
       </div>
-      <UploadList fileList={fileList} onRemove={() => {}} />
+      <UploadList fileList={fileList} onRemove={handleRemove} />
     </div>
   )
 }
