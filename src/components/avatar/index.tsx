@@ -1,38 +1,44 @@
-import './index.css'
+import type { FC } from 'react'
 import { cva } from 'class-variance-authority'
-import { clsx } from 'clsx'
-
-export type AvatarSize = 'large' | 'small' | 'default'
 
 export type AvatarProps = {
-  className?: string
-  style?: React.CSSProperties
+  /** 头像的大小 */
+  size?: 'sm' | 'md' | 'lg' | 'xl'
+  /** 头像的形状 */
+  shape?: 'square' | 'rounded'
+  /** 头像的图片地址 */
   src?: string
-  size?: AvatarSize
+  /** 头像的文本内容 */
+  text?: string
+  /** 头像的边框 */
+  className?: string
 }
-type AvatarVariants = Required<Pick<AvatarProps, 'size'>>
 
-const avatar = cva('avatar', {
+const avatarVariants = cva('', {
   variants: {
     size: {
-      large: 'lc-avatar-large',
-      small: 'lc-avatar-small',
-      default: 'lc-avatar-default',
+      sm: 'w-8',
+      md: 'w-16',
+      lg: 'w-20',
+      xl: 'w-32',
+    },
+    shape: {
+      rounded: 'rounded-xl',
+      square: 'rounded-full',
     },
   },
   defaultVariants: {
-    size: 'default',
+    size: 'md',
+    shape: 'rounded',
   },
 })
 
-export function Avatar(props: AvatarProps) {
-  const { className, style, src, size } = props
+export const Avatar: FC<AvatarProps> = ({ size = 'md', src, shape = 'rounded', className }) => {
   return (
-    <img
-      className={clsx(avatar({ size }), className)}
-      style={style}
-      src={src}
-      alt="avatar"
-    />
+    <div className='avatar'>
+      <div className={avatarVariants({ className, size })}>
+        <img src={src} alt={'avatar'} />
+      </div>
+    </div>
   )
 }
