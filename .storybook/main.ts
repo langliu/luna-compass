@@ -1,4 +1,5 @@
 import type { StorybookConfig } from 'storybook-react-rsbuild'
+import path from 'path'
 
 const config: StorybookConfig = {
   stories: [
@@ -21,6 +22,23 @@ const config: StorybookConfig = {
   typescript: {
     reactDocgen: 'react-docgen-typescript',
     check: true,
+  },
+  webpackFinal: async (config) => {
+    config.module.rules.push({
+      test: /\.css$/,
+      use: [
+        'style-loader',
+        {
+          loader: 'css-loader',
+          options: {
+            importLoaders: 1,
+          },
+        },
+        'postcss-loader',
+      ],
+      include: path.resolve(__dirname, '../'),
+    })
+    return config
   },
 }
 
